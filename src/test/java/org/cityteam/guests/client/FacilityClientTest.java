@@ -220,7 +220,7 @@ public class FacilityClientTest extends AbstractClientTest {
             return;
         }
 
-        Facility facility = facilityClient.findByNameExact("Portland");
+        Facility facility = facilityClient.findByNameExact("Oakland");
         List<Guest> guests = facilityClient.findGuestsByFacilityId(facility.getId());
         assertThat(guests.size(), is(greaterThan(0)));
 
@@ -256,7 +256,7 @@ public class FacilityClientTest extends AbstractClientTest {
             return;
         }
 
-        Facility facility = facilityClient.findByNameExact("Portland");
+        Facility facility = facilityClient.findByNameExact("Oakland");
         List<Guest> guests = facilityClient.findGuestsByName(facility.getId(), "ubble");
         assertThat(guests.size(), is(greaterThan(0)));
 
@@ -292,7 +292,7 @@ public class FacilityClientTest extends AbstractClientTest {
             return;
         }
 
-        Facility facility = facilityClient.findByNameExact("Portland");
+        Facility facility = facilityClient.findByNameExact("Oakland");
         Guest guest = facilityClient.findGuestsByNameExact
                 (facility.getId(), "Fred", "Flintstone");
 
@@ -358,7 +358,7 @@ public class FacilityClientTest extends AbstractClientTest {
             return;
         }
 
-        Facility facility = facilityClient.findByNameExact("Portland");
+        Facility facility = facilityClient.findByNameExact("Oakland");
         assertThrows(NotUnique.class,
                 () -> facilityClient.insert(facility));
 
@@ -374,7 +374,7 @@ public class FacilityClientTest extends AbstractClientTest {
         }
 
         // Change something but keep the name
-        Facility facility1 = facilityClient.findByNameExact("Portland");
+        Facility facility1 = facilityClient.findByNameExact("Oakland");
         facility1.setCity(facility1.getCity() + " Updated");
         facilityClient.update(facility1.getId(), facility1);
 

@@ -174,7 +174,7 @@ public class GuestClientTest extends AbstractClientTest {
             return;
         }
 
-        Facility facility = facilityClient.findByNameExact("Portland");
+        Facility facility = facilityClient.findByNameExact("Oakland");
 
         // Completely empty instance
         final Guest guest0 = new Guest();
@@ -270,7 +270,7 @@ public class GuestClientTest extends AbstractClientTest {
         }
 
         Facility facility1 = facilityClient.findByNameExact("Chester");
-        Facility facility2 = facilityClient.findByNameExact("Portland");
+        Facility facility2 = facilityClient.findByNameExact("Oakland");
 
         // Violate name uniqueness within facility
         Guest guest1 = facilityClient.findGuestsByNameExact
