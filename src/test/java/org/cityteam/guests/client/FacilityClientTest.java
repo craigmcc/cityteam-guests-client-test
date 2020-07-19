@@ -16,6 +16,7 @@
 package org.cityteam.guests.client;
 
 import org.cityteam.guests.model.Facility;
+import org.cityteam.guests.model.Guest;
 import org.craigmcc.library.shared.exception.BadRequest;
 import org.craigmcc.library.shared.exception.NotFound;
 import org.craigmcc.library.shared.exception.NotUnique;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import static java.lang.Boolean.TRUE;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -79,6 +81,10 @@ public class FacilityClientTest extends AbstractClientTest {
     @Test
     public void deleteNotFound() throws Exception {
 
+        if (disabled()) {
+            return;
+        }
+
         assertThrows(NotFound.class,
                 () -> facilityClient.delete(Long.MAX_VALUE));
 
@@ -88,6 +94,10 @@ public class FacilityClientTest extends AbstractClientTest {
 
     @Test
     public void findHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
 
         List<Facility> facilities = facilityClient.findAll();
         assertThat(facilities.size(), is(greaterThan(0)));
@@ -102,6 +112,10 @@ public class FacilityClientTest extends AbstractClientTest {
     @Test
     public void findNotFound() throws Exception {
 
+        if (disabled()) {
+            return;
+        }
+
         assertThrows(NotFound.class,
                 () -> facilityClient.find(Long.MAX_VALUE));
 
@@ -111,6 +125,10 @@ public class FacilityClientTest extends AbstractClientTest {
 
     @Test
     public void findAllHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
 
         List<Facility> facilities = facilityClient.findAll();
         assertThat(facilities.size(), is(greaterThan(0)));
@@ -131,6 +149,10 @@ public class FacilityClientTest extends AbstractClientTest {
     @Test
     public void findByNameHappy() throws Exception {
 
+        if (disabled()) {
+            return;
+        }
+
         List<Facility> facilities = facilityClient.findByName("san");
         assertThat(facilities.size(), is(greaterThan(0)));
 
@@ -148,6 +170,10 @@ public class FacilityClientTest extends AbstractClientTest {
     @Test
     public void findByNameNoMatch() throws Exception {
 
+        if (disabled()) {
+            return;
+        }
+
         List<Facility> facilities = facilityClient.findByName("unmatched");
         assertThat(facilities.size(), is(0));
 
@@ -157,6 +183,10 @@ public class FacilityClientTest extends AbstractClientTest {
 
     @Test
     public void findByNameExactHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
 
         List<Facility> facilities = facilityClient.findAll();
         assertThat(facilities.size(), is(greaterThan(0)));
@@ -172,8 +202,112 @@ public class FacilityClientTest extends AbstractClientTest {
     @Test
     public void findByNameNotFound() throws Exception {
 
+        if (disabled()) {
+            return;
+        }
+
         assertThrows(NotFound.class,
                 () -> facilityClient.findByNameExact("unmatched"));
+
+    }
+
+    // findGuestsByFacilityId() tests
+
+    @Test
+    public void findGuestsByFacilityIdHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        Facility facility = facilityClient.findByNameExact("Portland");
+        List<Guest> guests = facilityClient.findGuestsByFacilityId(facility.getId());
+        assertThat(guests.size(), is(greaterThan(0)));
+
+        String previousName = null;
+        for (Guest guest : guests) {
+            String thisName = guest.getLastName() + "|" + guest.getFirstName();
+            if (previousName != null) {
+                assertThat(thisName, is(greaterThan(previousName)));
+            }
+            previousName = thisName;
+        }
+
+    }
+
+    @Test
+    public void findGuestsByFacilityIdNoMatch() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        List<Guest> guests = facilityClient.findGuestsByFacilityId(Long.MAX_VALUE);
+        assertThat(guests.size(), is(equalTo(0)));
+
+    }
+
+    // findGuestsByName() tests
+
+    @Test
+    public void findGuestsByNameHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        Facility facility = facilityClient.findByNameExact("Portland");
+        List<Guest> guests = facilityClient.findGuestsByName(facility.getId(), "ubble");
+        assertThat(guests.size(), is(greaterThan(0)));
+
+        String previousName = null;
+        for (Guest guest : guests) {
+            String thisName = guest.getLastName() + "|" + guest.getFirstName();
+            if (previousName != null) {
+                assertThat(thisName, is(greaterThan(previousName)));
+            }
+            previousName = thisName;
+        }
+
+    }
+
+    @Test
+    public void findGuestsByNameNoMatch() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        List<Guest> guests = facilityClient.findGuestsByName(Long.MAX_VALUE, "ubble");
+        assertThat(guests.size(), is(equalTo(0)));
+
+    }
+
+    // findGuestsByNameExact() tests
+
+    @Test
+    public void findGuestsByNameExactHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        Facility facility = facilityClient.findByNameExact("Portland");
+        Guest guest = facilityClient.findGuestsByNameExact
+                (facility.getId(), "Fred", "Flintstone");
+
+    }
+
+    @Test
+    public void findGuestsByNameExactNoMatch() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        assertThrows(NotFound.class,
+                () -> facilityClient.findGuestsByNameExact
+                        (Long.MAX_VALUE, "Fred", "Flintstone"));
 
     }
 
@@ -181,6 +315,10 @@ public class FacilityClientTest extends AbstractClientTest {
 
     @Test
     public void insertHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
 
         Facility facility = newFacility();
         Facility inserted = facilityClient.insert(facility);
@@ -195,6 +333,10 @@ public class FacilityClientTest extends AbstractClientTest {
 
     @Test
     public void insertBadRequest() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
 
         // Completely empty instance
         final Facility facility0 = new Facility();
@@ -212,6 +354,10 @@ public class FacilityClientTest extends AbstractClientTest {
     @Test
     public void insertNotUnique() throws Exception {
 
+        if (disabled()) {
+            return;
+        }
+
         Facility facility = facilityClient.findByNameExact("Portland");
         assertThrows(NotUnique.class,
                 () -> facilityClient.insert(facility));
@@ -222,6 +368,10 @@ public class FacilityClientTest extends AbstractClientTest {
 
     @Test
     public void updateHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
 
         // Change something but keep the name
         Facility facility1 = facilityClient.findByNameExact("Portland");
@@ -238,6 +388,10 @@ public class FacilityClientTest extends AbstractClientTest {
     @Test
     public void updateBadRequest() throws Exception {
 
+        if (disabled()) {
+            return;
+        }
+
         // Required field
         Facility facility1 = facilityClient.findByNameExact("San Francisco");
         facility1.setName(null);
@@ -248,6 +402,10 @@ public class FacilityClientTest extends AbstractClientTest {
 
     @Test
     public void updateNotUnique() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
 
         // Violate name uniqueness
         Facility facility1 = facilityClient.findByNameExact("Oakland");
