@@ -15,17 +15,27 @@
  */
 package org.cityteam.guests.client;
 
+import org.cityteam.guests.action.Import;
 import org.cityteam.guests.model.Facility;
 import org.cityteam.guests.model.Guest;
+import org.cityteam.guests.model.Registration;
+import org.cityteam.guests.model.types.FeatureType;
 import org.craigmcc.library.shared.exception.BadRequest;
 import org.craigmcc.library.shared.exception.NotFound;
 import org.craigmcc.library.shared.exception.NotUnique;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Boolean.TRUE;
+import static org.cityteam.guests.model.types.PaymentType.$$;
+import static org.cityteam.guests.model.types.PaymentType.AG;
+import static org.cityteam.guests.model.types.PaymentType.CT;
+import static org.cityteam.guests.model.types.PaymentType.MM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -308,6 +318,123 @@ public class FacilityClientTest extends AbstractClientTest {
         assertThrows(NotFound.class,
                 () -> facilityClient.findGuestsByNameExact
                         (Long.MAX_VALUE, "Fred", "Flintstone"));
+
+    }
+
+    // findRegistrationsByFacilityAndDate() tests
+
+    @Test
+    public void findRegistrationsByFacilityAndDate() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        Facility facility = facilityClient.findByNameExact("Oakland");
+        List<Registration> registrations =
+                facilityClient.findRegistrationsByFacilityAndDate
+                        (facility.getId(), LocalDate.parse("2020-07-04"));
+        assertThat(registrations.size(), is(greaterThan(0)));
+
+    }
+
+    // importByFacilityAndDate() tests
+
+    @Test
+    public void importByFacilityAndDate() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        // Accumulate information we need to perform this test
+
+        String facilityName = "San Jose";
+        Facility facility = facilityClient.findByNameExact(facilityName);
+        LocalDate registrationDate = LocalDate.parse("2020-07-06");
+        LocalTime showerTime = LocalTime.parse("04:00");
+        LocalTime wakeupTime = LocalTime.parse("03:30");
+
+        List<FeatureType> features1 =
+                List.of(FeatureType.H);
+        List<FeatureType> features2 =
+                List.of(FeatureType.S);
+        List<FeatureType> features3 =
+                List.of(FeatureType.H, FeatureType.S);
+        List<Import> imports = new ArrayList<>();
+
+        // Add some unassigned mats
+        imports.add(new Import(features1, 1));
+        imports.add(new Import(features2, 2));
+        imports.add(new Import(features3, 3));
+
+        // Add some assigned mats (existing people)
+        imports.add(new Import(
+                "Fred on Mat 4",
+                features1,
+                "Fred",
+                "Flintstone",
+                4,
+                null,
+                AG,
+                showerTime,
+                null
+        ));
+        imports.add(new Import(
+                "Bam Bam on Mat 5",
+                features2,
+                "Bam Bam",
+                "Rubble",
+                5,
+                null,
+                $$,
+                null,
+                wakeupTime
+        ));
+        imports.add(new Import(
+                "Barney on Mat 6",
+                features3,
+                "Barney",
+                "Rubble",
+                6,
+                null,
+                MM,
+                showerTime,
+                wakeupTime
+        ));
+
+        // Add a new guest
+        imports.add(new Import(
+                "New Person on Mat 7",
+                null,
+                "New",
+                "Person",
+                7,
+                null,
+                CT,
+                null,
+                null
+        ));
+
+        // Import these and verify the results
+        List<Registration> registrations =
+                facilityClient.importRegistrationsByFacilityAndDate(
+                        facility.getId(),
+                        registrationDate,
+                        imports
+                );
+        assertThat(registrations.size(), is(equalTo(imports.size())));
+
+        // Retrieve them again and match them up
+        List<Registration> retrieves =
+                facilityClient.findRegistrationsByFacilityAndDate(
+                        facility.getId(),
+                        registrationDate
+                );
+        assertThat(retrieves.size(), is(equalTo(registrations.size())));
+        for (int i = 0; i < retrieves.size(); i++) {
+            assertThat(retrieves.get(i), is(equalTo(registrations.get(i))));
+        }
 
     }
 

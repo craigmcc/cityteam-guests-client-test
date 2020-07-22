@@ -17,12 +17,14 @@ package org.cityteam.guests.client;
 
 import org.cityteam.guests.model.Facility;
 import org.cityteam.guests.model.Guest;
+import org.cityteam.guests.model.Registration;
 import org.craigmcc.library.shared.exception.BadRequest;
 import org.craigmcc.library.shared.exception.NotFound;
 import org.craigmcc.library.shared.exception.NotUnique;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static java.lang.Boolean.TRUE;
@@ -132,13 +134,13 @@ public class GuestClientTest extends AbstractClientTest {
         List<Guest> guests = guestClient.findAll();
         assertThat(guests.size(), is(greaterThan(0)));
 
-        String previousName = null;
+        String previousKey = null;
         for (Guest guest : guests) {
-            String thisName = guest.getLastName() + "|" + guest.getFirstName();
-            if (previousName != null) {
-                assertThat(thisName, is(greaterThan(previousName)));
+            String thisKey = guest.getFacilityId() + "|" +guest.getLastName() + "|" + guest.getFirstName();
+            if (previousKey != null) {
+                assertThat(thisKey, is(greaterThan(previousKey)));
             }
-            previousName = thisName;
+            previousKey = thisKey;
         }
 
     }
@@ -187,7 +189,7 @@ public class GuestClientTest extends AbstractClientTest {
 
         // Missing lastName field
         final Guest guest2 = newGuest(facility.getId());
-        guest1.setLastName(null);
+        guest2.setLastName(null);
         assertThrows(BadRequest.class,
                 () -> guestClient.insert(guest2));
 
@@ -254,7 +256,7 @@ public class GuestClientTest extends AbstractClientTest {
         // Required lastName
         Guest guest2 = facilityClient.findGuestsByNameExact
                 (facility.getId(), "Bam Bam", "Rubble");
-        guest1.setLastName(null);
+        guest2.setLastName(null);
         assertThrows(BadRequest.class,
                 () -> guestClient.update(guest2.getId(), guest2));
 
@@ -281,8 +283,7 @@ public class GuestClientTest extends AbstractClientTest {
         Guest guest2 = facilityClient.findGuestsByNameExact
                 (facility1.getId(), "Bam Bam", "Rubble");
         guest1.setFacilityId(facility2.getId());
-        assertThrows(NotUnique.class,
-                () -> guestClient.update(guest2.getId(), guest2));
+        guestClient.update(guest2.getId(), guest2);
 
     }
 

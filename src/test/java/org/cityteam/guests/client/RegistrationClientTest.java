@@ -16,25 +16,32 @@
 package org.cityteam.guests.client;
 
 import org.cityteam.guests.action.Assign;
+import org.cityteam.guests.action.Import;
 import org.cityteam.guests.model.Facility;
 import org.cityteam.guests.model.Guest;
 import org.cityteam.guests.model.Registration;
+import org.cityteam.guests.model.types.FeatureType;
 import org.craigmcc.library.shared.exception.InternalServerError;
 import org.craigmcc.library.shared.exception.NotFound;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Boolean.TRUE;
+import static org.cityteam.guests.model.types.PaymentType.$$;
 import static org.cityteam.guests.model.types.PaymentType.AG;
 import static org.cityteam.guests.model.types.PaymentType.CT;
+import static org.cityteam.guests.model.types.PaymentType.MM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThrows;
 
 public class RegistrationClientTest extends AbstractClientTest {
@@ -68,7 +75,7 @@ public class RegistrationClientTest extends AbstractClientTest {
         }
 
         Facility facility = facilityClient.findByNameExact("Oakland");
-        LocalDate registrationDate = LocalDate.parse("2020-07-04");
+        LocalDate registrationDate = LocalDate.parse("2020-07-09");
         Registration registration = newRegistration
                 (facility.getId(), 3, registrationDate);
         registration = registrationClient.insert(registration);
@@ -123,8 +130,8 @@ public class RegistrationClientTest extends AbstractClientTest {
         assertThat(registration.getPaymentType(), is(equalTo(CT)));
 
         registration = registrationClient.deassign(registration.getId());
-        assertThat(registration.getGuestId(), is(null));
-        assertThat(registration.getPaymentType(), is(null));
+        assertThat(registration.getGuestId(), is(nullValue()));
+        assertThat(registration.getPaymentType(), is(nullValue()));
 
     }
 
@@ -230,7 +237,7 @@ public class RegistrationClientTest extends AbstractClientTest {
         }
 
         Facility facility = facilityClient.findByNameExact("Chester");
-        LocalDate registrationDate = LocalDate.parse("2020-07-04");
+        LocalDate registrationDate = LocalDate.parse("2020-07-08");
         Registration registration = newRegistration
                 (facility.getId(), 1, registrationDate);
         Registration inserted = registrationClient.insert(registration);
@@ -240,8 +247,8 @@ public class RegistrationClientTest extends AbstractClientTest {
         assertThat(inserted.getUpdated(), is(notNullValue()));
         assertThat(inserted.getVersion(), is(0));
         assertThat(inserted.getFacilityId(), is(equalTo(facility.getId())));
-        assertThat(inserted.getFeatures(), is(null));
-        assertThat(inserted.getGuestId(), is(null));
+        assertThat(inserted.getFeatures(), is(nullValue()));
+        assertThat(inserted.getGuestId(), is(nullValue()));
         assertThat(inserted.getMatNumber(), is(equalTo(registration.getMatNumber())));
         assertThat(inserted.getRegistrationDate(), is(equalTo(registrationDate)));
 
@@ -261,7 +268,7 @@ public class RegistrationClientTest extends AbstractClientTest {
         }
 
         Facility facility = facilityClient.findByNameExact("Chester");
-        LocalDate registrationDate = LocalDate.parse("2020-07-04");
+        LocalDate registrationDate = LocalDate.parse("2020-07-07");
         Registration registration = newRegistration
                 (facility.getId(), 2, registrationDate);
         Registration inserted = registrationClient.insert(registration);
