@@ -16,26 +16,20 @@
 package org.cityteam.guests.client;
 
 import org.cityteam.guests.action.Assign;
-import org.cityteam.guests.action.Import;
 import org.cityteam.guests.model.Facility;
 import org.cityteam.guests.model.Guest;
 import org.cityteam.guests.model.Registration;
-import org.cityteam.guests.model.types.FeatureType;
 import org.craigmcc.library.shared.exception.InternalServerError;
 import org.craigmcc.library.shared.exception.NotFound;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Boolean.TRUE;
-import static org.cityteam.guests.model.types.PaymentType.$$;
 import static org.cityteam.guests.model.types.PaymentType.AG;
 import static org.cityteam.guests.model.types.PaymentType.CT;
-import static org.cityteam.guests.model.types.PaymentType.MM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
