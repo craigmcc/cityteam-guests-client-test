@@ -15,6 +15,7 @@
  */
 package org.cityteam.guests.client;
 
+import org.cityteam.guests.model.Ban;
 import org.cityteam.guests.model.Facility;
 import org.cityteam.guests.model.Guest;
 import org.cityteam.guests.model.Registration;
@@ -28,6 +29,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static java.lang.Boolean.TRUE;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
@@ -142,6 +144,80 @@ public class GuestClientTest extends AbstractClientTest {
             }
             previousKey = thisKey;
         }
+
+    }
+
+    // findBansByGuestIdHappy() tests
+
+    @Test
+    public void findBansByGuestIdHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        String facilityName = "San Francisco";
+        Facility facility = facilityClient.findByNameExact(facilityName);
+        List<Guest> guests =
+                facilityClient.findGuestsByFacilityId(facility.getId());
+
+        for (Guest guest : guests) {
+            List<Ban> bans = guestClient.findBansByGuestId(guest.getId());
+            String previousKey = null;
+            for (Ban ban : bans) {
+                assertThat(ban.getComments(), startsWith(facilityName));
+                String thisKey = ban.getBanFrom().toString();
+                if (previousKey != null) {
+                    assertThat(thisKey, is(greaterThan(previousKey)));
+                }
+                previousKey = thisKey;
+            }
+        }
+
+    }
+
+    // findBansByGuestIdAndRegistrationDate() tests
+
+    @Test
+    public void findBansByGuestIdAndRegistrationDateHappy() throws Exception {
+
+        String facilityName = "San Francisco";
+        Facility facility = facilityClient.findByNameExact(facilityName);
+        Guest guest = facilityClient.findGuestsByNameExact
+                (facility.getId(), "Fred", "Flintstone");
+
+        guestClient.findBansByGuestIdAndRegistrationDate
+                (guest.getId(), LocalDate.parse("2020-08-01"));
+        guestClient.findBansByGuestIdAndRegistrationDate
+                (guest.getId(), LocalDate.parse("2020-08-15"));
+        guestClient.findBansByGuestIdAndRegistrationDate
+                (guest.getId(), LocalDate.parse("2020-08-31"));
+        guestClient.findBansByGuestIdAndRegistrationDate
+                (guest.getId(), LocalDate.parse("2020-10-01"));
+        guestClient.findBansByGuestIdAndRegistrationDate
+                (guest.getId(), LocalDate.parse("2020-10-15"));
+        guestClient.findBansByGuestIdAndRegistrationDate
+                (guest.getId(), LocalDate.parse("2020-10-31"));
+
+    }
+
+    @Test
+    public void findBansByGuestIdAndRegistrationDateNotFound() throws Exception {
+
+        String facilityName = "San Francisco";
+        Facility facility = facilityClient.findByNameExact(facilityName);
+        Guest guest = facilityClient.findGuestsByNameExact
+                (facility.getId(), "Fred", "Flintstone");
+
+        assertThrows(NotFound.class,
+                () -> guestClient.findBansByGuestIdAndRegistrationDate
+                        (guest.getId(), LocalDate.parse("2020-07-15")));
+        assertThrows(NotFound.class,
+                () -> guestClient.findBansByGuestIdAndRegistrationDate
+                        (guest.getId(), LocalDate.parse("2020-09-15")));
+        assertThrows(NotFound.class,
+                () -> guestClient.findBansByGuestIdAndRegistrationDate
+                        (guest.getId(), LocalDate.parse("2020-11-15")));
 
     }
 
