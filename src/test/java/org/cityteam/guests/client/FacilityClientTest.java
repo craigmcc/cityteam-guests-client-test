@@ -20,6 +20,7 @@ import org.cityteam.guests.action.ImportResults;
 import org.cityteam.guests.model.Facility;
 import org.cityteam.guests.model.Guest;
 import org.cityteam.guests.model.Registration;
+import org.cityteam.guests.model.Template;
 import org.cityteam.guests.model.types.FeatureType;
 import org.craigmcc.library.shared.exception.BadRequest;
 import org.craigmcc.library.shared.exception.NotFound;
@@ -336,6 +337,110 @@ public class FacilityClientTest extends AbstractClientTest {
                 facilityClient.findRegistrationsByFacilityAndDate
                         (facility.getId(), LocalDate.parse("2020-07-04"));
         assertThat(registrations.size(), is(greaterThan(0)));
+
+    }
+
+    // findTemplatesByFacilityId() tests
+
+    @Test
+    public void findTemplatesByFacilityIdHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        Facility facility = facilityClient.findByNameExact("Oakland");
+        List<Template> templates =
+                facilityClient.findTemplatesByFacilityId(facility.getId());
+        assertThat(templates.size(), is(greaterThan(0)));
+
+        String previousName = null;
+        for (Template template : templates) {
+            String thisName = template.getName();
+            if (previousName != null) {
+                assertThat(thisName, is(greaterThan(previousName)));
+            }
+            previousName = thisName;
+        }
+
+    }
+
+    @Test
+    public void findTemplatesByFacilityIdNoMatch() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        List<Template> templates =
+                facilityClient.findTemplatesByFacilityId(Long.MAX_VALUE);
+        assertThat(templates.size(), is(equalTo(0)));
+
+    }
+
+    // findTemplatesByName() tests
+
+    @Test
+    public void findTemplatesByNameHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        Facility facility = facilityClient.findByNameExact("Oakland");
+        List<Template> templates =
+                facilityClient.findTemplatesByName(facility.getId(), "land");
+        assertThat(templates.size(), is(greaterThan(0)));
+
+        String previousName = null;
+        for (Template template : templates) {
+            String thisName = template.getName();
+            if (previousName != null) {
+                assertThat(thisName, is(greaterThan(previousName)));
+            }
+            previousName = thisName;
+        }
+
+    }
+
+    @Test
+    public void findTemplatesByNameNoMatch() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        List<Template> templates =
+                facilityClient.findTemplatesByName(Long.MAX_VALUE, "land");
+        assertThat(templates.size(), is(equalTo(0)));
+
+    }
+
+    // findTemplatesByNameExact() tests
+
+    @Test
+    public void findTemplatesByNameExactHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        Facility facility = facilityClient.findByNameExact("Oakland");
+        Template template = facilityClient.findTemplatesByNameExact
+                (facility.getId(), "Oakland COVID");
+
+    }
+
+    @Test
+    public void findTemplatesByNameExactNoMatch() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        assertThrows(NotFound.class,
+                () -> facilityClient.findTemplatesByNameExact
+                        (Long.MAX_VALUE, "Unmatched"));
 
     }
 
