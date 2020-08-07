@@ -16,20 +16,27 @@
 package org.cityteam.guests.client;
 
 import org.cityteam.guests.model.Facility;
+import org.cityteam.guests.model.Registration;
 import org.cityteam.guests.model.Template;
 import org.craigmcc.library.shared.exception.BadRequest;
+import org.craigmcc.library.shared.exception.InternalServerError;
 import org.craigmcc.library.shared.exception.NotFound;
 import org.craigmcc.library.shared.exception.NotUnique;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static java.lang.Boolean.TRUE;
+import static org.cityteam.guests.model.types.FeatureType.H;
+import static org.cityteam.guests.model.types.FeatureType.S;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThrows;
 
 public class TemplateClientTest extends AbstractClientTest {
@@ -140,6 +147,54 @@ public class TemplateClientTest extends AbstractClientTest {
                 assertThat(thisName, is(greaterThan(previousName)));
             }
             previousName = thisName;
+        }
+
+    }
+
+    // generate() tests
+
+    @Test
+    public void generateHappy() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        Facility facility = facilityClient.findByNameExact("San Francisco");
+        Template template = findTemplatesByNameExact(facility.getId(),
+                "San Francisco COVID");
+
+        LocalDate registrationDate = LocalDate.parse("2020-07-07");
+        List<Registration> registrations = templateClient.generate
+                (template.getId(), registrationDate);
+        assertThat(registrations.size(), is(equalTo(12)));
+
+        for (Registration registration : registrations) {
+            assertThat(registration.getComments(), is(nullValue()));
+            assertThat(registration.getFacilityId(),
+                    is(equalTo(facility.getId())));
+            if (registration.getMatNumber() == 1) {
+                assertThat(registration.getFeatures().contains(H),
+                        is(true));
+            } else if (registration.getMatNumber() == 3) {
+                assertThat(registration.getFeatures().contains(H),
+                        is(true));
+                assertThat(registration.getFeatures().contains(S),
+                        is(true));
+            } else if (registration.getMatNumber() == 5) {
+                assertThat(registration.getFeatures().contains(S),
+                        is(true));
+            } else {
+                assertThat(registration.getFeatures(), is(nullValue()));
+            }
+            assertThat(registration.getGuestId(), is(nullValue()));
+            assertThat(registration.getMatNumber(), is(notNullValue()));
+            assertThat(registration.getPaymentAmount(), is(nullValue()));
+            assertThat(registration.getPaymentType(), is(nullValue()));
+            assertThat(registration.getShowerTime(), is(nullValue()));
+            assertThat(registration.getWakeupTime(), is(nullValue()));
+            assertThat(registration.getRegistrationDate(),
+                    is(equalTo(registrationDate)));
         }
 
     }
@@ -268,6 +323,12 @@ public class TemplateClientTest extends AbstractClientTest {
     }
 
     // Support Methods -------------------------------------------------------
+
+    private Template findTemplatesByNameExact(Long facilityId, String name)
+        throws InternalServerError, NotFound
+    {
+        return facilityClient.findTemplatesByNameExact(facilityId, name);
+    }
 
     private Template newTemplate(Long facilityId) {
         return new Template(
