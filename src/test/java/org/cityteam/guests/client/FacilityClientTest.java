@@ -51,6 +51,9 @@ public class FacilityClientTest extends AbstractClientTest {
 
     private final FacilityClient facilityClient = new FacilityClient();
 
+    private final RegistrationClient registrationClient =
+            new RegistrationClient();
+
     // Lifecycle Methods -----------------------------------------------------
 
     @Before
@@ -98,6 +101,35 @@ public class FacilityClientTest extends AbstractClientTest {
 
         assertThrows(NotFound.class,
                 () -> facilityClient.delete(Long.MAX_VALUE));
+
+    }
+
+    // deleteRegistrationsByFacilityAndDate() tests
+
+    @Test
+    public void deleteRegistrationsByFacilityAndDate() throws Exception {
+
+        if (disabled()) {
+            return;
+        }
+
+        Facility facility = facilityClient.findByNameExact("Chester");
+        LocalDate registrationDate = LocalDate.parse("2020-07-04");
+        List<Registration> registrations =
+                facilityClient.findRegistrationsByFacilityAndDate
+                        (facility.getId(), registrationDate);
+        assertThat(registrations.size(), is(greaterThan(0)));
+
+        for (Registration registration : registrations) {
+            if (registration.getGuestId() != null) {
+                registrationClient.deassign(registration.getId());
+            }
+        }
+
+        List<Registration> results =
+                facilityClient.deleteRegistrationsByFacilityAndDate
+                        (facility.getId(), registrationDate);
+        assertThat(results.size(), is(equalTo(registrations.size())));
 
     }
 
